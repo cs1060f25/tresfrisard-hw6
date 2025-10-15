@@ -1,4 +1,4 @@
-# Updated app.py with support for New York corporations and LLCs
+# Updated app.py with NY generators matching the examples
 
 from flask import Flask, request, jsonify, send_file
 from pydantic import BaseModel, Field, validator
@@ -186,41 +186,46 @@ def generate_new_york_articles(company_data: CompanyFormation) -> BytesIO:
     
     # Set up the document
     c.setFont("Helvetica-Bold", 16)
-    c.drawCentredString(300, 750, f"CERTIFICATE OF INCORPORATION OF {company_data.company_name.upper()}")
+    c.drawCentredString(300, 750, "CERTIFICATE OF INCORPORATION")
+    c.drawCentredString(300, 730, "OF")
+    c.drawCentredString(300, 710, company_data.company_name.upper())
     c.setFont("Helvetica", 12)
-    c.drawCentredString(300, 730, "Under Section 402 of the Business Corporation Law")
+    c.drawCentredString(300, 690, "Under Section 402 of the Business Corporation Law")
     
     # FIRST
-    c.drawString(50, 680, "FIRST: The name of the corporation is:")
-    c.drawString(70, 660, company_data.company_name)
+    c.drawString(50, 640, "FIRST: The name of this corporation is:")
+    c.drawString(70, 620, company_data.company_name)
     
     # SECOND
-    c.drawString(50, 610, "SECOND: The purpose of the corporation is to engage in any lawful act or activity for which")
-    c.drawString(50, 590, "a corporation may be organized under the Business Corporation Law. The corporation is not")
-    c.drawString(50, 570, "formed to engage in any act or activity requiring the consent or approval of any state")
-    c.drawString(50, 550, "official, department, board, agency or other body without such consent or approval first being obtained.")
+    c.drawString(50, 570, "SECOND: The purpose of the corporation is to engage in any lawful act or activity for which")
+    c.drawString(50, 550, "a corporation may be organized under the Business Corporation Law. The corporation is not")
+    c.drawString(50, 530, "formed to engage in any act or activity requiring the consent or approval of any state official,")
+    c.drawString(50, 510, "department, board, agency or other body without such consent or approval first being obtained.")
     
     # THIRD
-    c.drawString(50, 500, "THIRD: The county, within this state, in which the office of the corporation is to be located is:")
-    c.drawString(70, 480, "New York")
+    c.drawString(50, 460, "THIRD: The county, within this state, in which the office of the corporation is to be located is:")
+    c.drawString(70, 440, "ALBANY COUNTY.")
     
     # FOURTH
-    c.drawString(50, 430, "FOURTH: The corporation shall have authority to issue one class of shares consisting of 200")
-    c.drawString(50, 410, "common shares without par value.")
+    c.drawString(50, 390, "FOURTH: The corporation shall have authority to issue one class of shares consisting of")
+    c.drawString(50, 370, "1,000 common shares with $0.01 par value per share.")
     
     # FIFTH
-    c.drawString(50, 360, "FIFTH: The Secretary of State is designated as agent of the corporation upon whom process")
-    c.drawString(50, 340, "against the corporation may be served. The post office address to which the Secretary of State")
-    c.drawString(50, 320, "shall mail a copy of any process against the corporation served upon the Secretary of State by")
-    c.drawString(50, 300, "personal delivery is: 123 Fake Street, New York, NY 10001")
+    c.drawString(50, 320, "FIFTH: The Secretary of State is designated as agent of the corporation upon whom process")
+    c.drawString(50, 300, "against the corporation may be served.")
+    c.drawString(50, 280, "The post office address to which the Secretary of State shall mail a copy of any process")
+    c.drawString(50, 260, "against the corporation served upon the Secretary of State by personal delivery is:")
+    c.drawString(70, 240, "418 BROADWAY STE Y, ALBANY, ALBANY COUNTY, NY 12207")
     
     # Incorporator
-    c.drawString(50, 200, company_data.incorporator_name)
-    c.drawString(50, 180, "(Signature of Incorporator)")
-    c.drawString(50, 150, company_data.incorporator_name)
-    c.drawString(50, 130, "(Print or Type Name of Incorporator)")
-    c.drawString(50, 100, "123 Fake Street")
-    c.drawString(50, 80, "New York, NY 10001")
+    c.drawString(50, 190, "Incorporator:")
+    c.drawString(70, 170, f"/s/ {company_data.incorporator_name}")
+    c.drawString(70, 150, "418 BROADWAY STE Y, ALBANY, ALBANY COUNTY, NY 12207")
+    
+    # Filer's Name and Address
+    c.drawString(50, 120, "Filer's Name and Address:")
+    c.drawString(70, 100, f"/s/ {company_data.incorporator_name}")
+    c.drawString(70, 80, "418 BROADWAY STE Y, ALBANY, ALBANY COUNTY, NY 12207")
     
     c.save()
     buffer.seek(0)
@@ -232,29 +237,36 @@ def generate_new_york_llc_certificate(company_data: CompanyFormation) -> BytesIO
     
     # Set up the document
     c.setFont("Helvetica-Bold", 16)
-    c.drawCentredString(300, 750, f"ARTICLES OF ORGANIZATION OF {company_data.company_name.upper()}")
+    c.drawCentredString(300, 750, "ARTICLES OF ORGANIZATION")
+    c.drawCentredString(300, 730, "OF")
+    c.drawCentredString(300, 710, company_data.company_name.upper())
     c.setFont("Helvetica", 12)
-    c.drawCentredString(300, 730, "Under Section 203 of the Limited Liability Company Law")
+    c.drawCentredString(300, 690, "Under Section 203 of the Limited Liability Company Law")
     
     # FIRST
-    c.drawString(50, 680, "FIRST: The name of the limited liability company is:")
-    c.drawString(70, 660, company_data.company_name)
+    c.drawString(50, 640, "FIRST: The name of the limited liability company is:")
+    c.drawString(70, 620, company_data.company_name)
     
     # SECOND
-    c.drawString(50, 610, "SECOND: The county within this state in which the office of the limited liability company")
-    c.drawString(50, 590, "is to be located is: New York")
+    c.drawString(50, 570, "SECOND: The county, within this state, in which the office of the limited liability company is to be")
+    c.drawString(50, 550, "located is: ALBANY COUNTY.")
     
     # THIRD
-    c.drawString(50, 540, "THIRD: The Secretary of State is designated as agent of the limited liability company upon")
-    c.drawString(50, 520, "whom process against the limited liability company may be served. The post office address to")
-    c.drawString(50, 500, "which the Secretary of State shall mail a copy of any process against the limited liability")
-    c.drawString(50, 480, "company served upon the Secretary of State by personal delivery is: 123 Fake Street, New York, NY 10001")
+    c.drawString(50, 500, "THIRD: The Secretary of State is designated as agent of the limited liability company upon whom")
+    c.drawString(50, 480, "process against the limited liability company may be served.")
+    c.drawString(50, 460, "The post office address to which the Secretary of State shall mail a copy of any process against")
+    c.drawString(50, 440, "the limited liability company served upon the Secretary of State by personal delivery is:")
+    c.drawString(70, 420, "418 BROADWAY STE Y, ALBANY, ALBANY COUNTY, NY 12207")
     
     # Organizer
-    c.drawString(50, 400, company_data.incorporator_name)
-    c.drawString(50, 380, "(Signature of Organizer)")
-    c.drawString(50, 350, company_data.incorporator_name)
-    c.drawString(50, 330, "(Print or Type Name of Organizer)")
+    c.drawString(50, 370, "Organizer:")
+    c.drawString(70, 350, f"/s/ {company_data.incorporator_name}")
+    c.drawString(70, 330, "418 BROADWAY STE Y, ALBANY, ALBANY COUNTY, NY 12207")
+    
+    # Filer's Name and Address
+    c.drawString(50, 300, "Filer's Name and Address:")
+    c.drawString(70, 280, f"/s/ {company_data.incorporator_name}")
+    c.drawString(70, 260, "418 BROADWAY STE Y, ALBANY, ALBANY COUNTY, NY 12207")
     
     c.save()
     buffer.seek(0)
