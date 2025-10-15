@@ -1,5 +1,7 @@
+# Updated test_company_formation.py with tests for New York
+
 import pytest
-from app import CompanyFormation, generate_delaware_articles, generate_california_articles, generate_california_llc_certificate
+from app import CompanyFormation, generate_delaware_articles, generate_california_articles, generate_california_llc_certificate, generate_new_york_articles, generate_new_york_llc_certificate
 from pydantic import ValidationError
 from PyPDF2 import PdfReader
 import io
@@ -102,3 +104,49 @@ def test_california_llc_pdf():
     assert "ARTICLE I: The name of the limited liability company is:" in text
     assert "ARTICLE II: The purpose of the limited liability company" in text
     assert "ARTICLE III: The name and address in California" in text
+
+def test_new_york_corporation_pdf():
+    test_data = {
+        "company_name": "New York Test Corp",
+        "state_of_formation": "NY",
+        "company_type": "corporation",
+        "incorporator_name": "Testy McTestface"
+    }
+    
+    pdf_buffer = generate_new_york_articles(CompanyFormation(**test_data))
+    pdf_buffer.seek(0)
+    
+    reader = PdfReader(pdf_buffer)
+    text = "\n".join(page.extract_text() for page in reader.pages)
+    
+    assert "New York Test Corp" in text
+    assert "Testy McTestface" in text
+    assert "CERTIFICATE OF INCORPORATION" in text
+    assert "Under Section 402 of the Business Corporation Law" in text
+    assert "FIRST: The name of the corporation is:" in text
+    assert "SECOND: The purpose of the corporation is to engage" in text
+    assert "THIRD: The county, within this state" in text
+    assert "FOURTH: The corporation shall have authority" in text
+    assert "FIFTH: The Secretary of State is designated" in text
+
+def test_new_york_llc_pdf():
+    test_data = {
+        "company_name": "New York Test LLC",
+        "state_of_formation": "NY",
+        "company_type": "LLC",
+        "incorporator_name": "Testy McTestface"
+    }
+    
+    pdf_buffer = generate_new_york_llc_certificate(CompanyFormation(**test_data))
+    pdf_buffer.seek(0)
+    
+    reader = PdfReader(pdf_buffer)
+    text = "\n".join(page.extract_text() for page in reader.pages)
+    
+    assert "New York Test LLC" in text
+    assert "Testy McTestface" in text
+    assert "ARTICLES OF ORGANIZATION" in text
+    assert "Under Section 203 of the Limited Liability Company Law" in text
+    assert "FIRST: The name of the limited liability company is:" in text
+    assert "SECOND: The county within this state" in text
+    assert "THIRD: The Secretary of State is designated" in text
