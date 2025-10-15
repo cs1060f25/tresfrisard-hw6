@@ -1,6 +1,5 @@
-# Updated test_company_formation.py with tests for New York
-
 import pytest
+import re
 from app import CompanyFormation, generate_delaware_articles, generate_california_articles, generate_california_llc_certificate, generate_new_york_articles, generate_new_york_llc_certificate
 from pydantic import ValidationError
 from PyPDF2 import PdfReader
@@ -15,6 +14,10 @@ VALID_STATES = [
     'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
     'DC', 'PR', 'GU', 'VI', 'AS', 'MP'
 ]
+
+def normalize_text(text):
+    """Normalize PDF-extracted text by collapsing whitespace and uppercasing."""
+    return re.sub(r'\s+', ' ', text.strip()).upper()
 
 def test_state_validation():
     # Test all valid states
@@ -39,7 +42,6 @@ def test_state_validation():
         CompanyFormation(**data)
 
 def test_pdf_generation():
-    # Test data
     test_data = {
         "company_name": "Basic Test Company",
         "state_of_formation": "DE",
@@ -47,15 +49,12 @@ def test_pdf_generation():
         "incorporator_name": "Testy McTestface"
     }
     
-    # Generate PDF
     pdf_buffer = generate_delaware_articles(CompanyFormation(**test_data))
     pdf_buffer.seek(0)
     
-    # Read PDF content
     reader = PdfReader(pdf_buffer)
     text = "\n".join(page.extract_text() for page in reader.pages)
     
-    # Verify key content
     assert "Basic Test Company" in text
     assert "Testy McTestface" in text
     assert "CERTIFICATE OF INCORPORATION" in text
@@ -107,7 +106,7 @@ def test_california_llc_pdf():
 
 def test_new_york_corporation_pdf():
     test_data = {
-        "company_name": "New York Test Corp",
+        "company_name": "Test Company",
         "state_of_formation": "NY",
         "company_type": "corporation",
         "incorporator_name": "Testy McTestface"
@@ -117,21 +116,22 @@ def test_new_york_corporation_pdf():
     pdf_buffer.seek(0)
     
     reader = PdfReader(pdf_buffer)
-    text = "\n".join(page.extract_text() for page in reader.pages)
+    text = normalize_text("\n".join(page.extract_text() for page in reader.pages))
     
-    assert "New York Test Corp" in text
-    assert "Testy McTestface" in text
-    assert "CERTIFICATE OF INCORPORATION" in text
-    assert "Under Section 402 of the Business Corporation Law" in text
-    assert "FIRST: The name of the corporation is:" in text
-    assert "SECOND: The purpose of the corporation is to engage" in text
-    assert "THIRD: The county, within this state" in text
-    assert "FOURTH: The corporation shall have authority" in text
-    assert "FIFTH: The Secretary of State is designated" in text
+    # Verify full key content matching the image
+    assert "CERTIFICATE OF INCORPORATION OF TEST COMPANY" in text
+    assert "UNDER SECTION 402 OF THE BUSINESS CORPORATION LAW" in text
+    assert "FIRST: THE NAME OF THIS CORPORATION IS: TEST COMPANY" in text
+    assert "SECOND: THE PURPOSE OF THE CORPORATION IS TO ENGAGE IN ANY LAWFUL ACT OR ACTIVITY FOR WHICH A CORPORATION MAY BE ORGANIZED UNDER THE BUSINESS CORPORATION LAW. THE CORPORATION IS NOT FORMED TO ENGAGE IN ANY ACT OR ACTIVITY REQUIRING THE CONSENT OR APPROVAL OF ANY STATE OFFICIAL, DEPARTMENT, BOARD, AGENCY OR OTHER BODY WITHOUT SUCH CONSENT OR APPROVAL FIRST BEING OBTAINED." in text
+    assert "THIRD: THE COUNTY, WITHIN THIS STATE, IN WHICH THE OFFICE OF THE CORPORATION IS TO BE LOCATED IS: ALBANY COUNTY." in text
+    assert "FOURTH: THE CORPORATION SHALL HAVE AUTHORITY TO ISSUE ONE CLASS OF SHARES CONSISTING OF 1,000 COMMON SHARES WITH $0.01 PAR VALUE PER SHARE." in text
+    assert "FIFTH: THE SECRETARY OF STATE IS DESIGNATED AS AGENT OF THE CORPORATION UPON WHOM PROCESS AGAINST THE CORPORATION MAY BE SERVED. THE POST OFFICE ADDRESS TO WHICH THE SECRETARY OF STATE SHALL MAIL A COPY OF ANY PROCESS AGAINST THE CORPORATION SERVED UPON THE SECRETARY OF STATE BY PERSONAL DELIVERY IS: 418 BROADWAY STE Y, ALBANY, ALBANY COUNTY, NY 12207" in text
+    assert "INCORPORATOR: /S/ TESTY MCTESTFACE 418 BROADWAY STE Y, ALBANY, ALBANY COUNTY, NY 12207" in text
+    assert "FILER'S NAME AND ADDRESS: /S/ TESTY MCTESTFACE 418 BROADWAY STE Y, ALBANY, ALBANY COUNTY, NY 12207" in text
 
 def test_new_york_llc_pdf():
     test_data = {
-        "company_name": "New York Test LLC",
+        "company_name": "Test Company",
         "state_of_formation": "NY",
         "company_type": "LLC",
         "incorporator_name": "Testy McTestface"
@@ -141,12 +141,13 @@ def test_new_york_llc_pdf():
     pdf_buffer.seek(0)
     
     reader = PdfReader(pdf_buffer)
-    text = "\n".join(page.extract_text() for page in reader.pages)
+    text = normalize_text("\n".join(page.extract_text() for page in reader.pages))
     
-    assert "New York Test LLC" in text
-    assert "Testy McTestface" in text
-    assert "ARTICLES OF ORGANIZATION" in text
-    assert "Under Section 203 of the Limited Liability Company Law" in text
-    assert "FIRST: The name of the limited liability company is:" in text
-    assert "SECOND: The county within this state" in text
-    assert "THIRD: The Secretary of State is designated" in text
+    # Verify full key content matching the image
+    assert "ARTICLES OF ORGANIZATION OF TEST COMPANY" in text
+    assert "UNDER SECTION 203 OF THE LIMITED LIABILITY COMPANY LAW" in text
+    assert "FIRST: THE NAME OF THE LIMITED LIABILITY COMPANY IS: TEST COMPANY" in text
+    assert "SECOND: THE COUNTY, WITHIN THIS STATE, IN WHICH THE OFFICE OF THE LIMITED LIABILITY COMPANY IS TO BE LOCATED IS: ALBANY COUNTY." in text
+    assert "THIRD: THE SECRETARY OF STATE IS DESIGNATED AS AGENT OF THE LIMITED LIABILITY COMPANY UPON WHOM PROCESS AGAINST THE LIMITED LIABILITY COMPANY MAY BE SERVED. THE POST OFFICE ADDRESS TO WHICH THE SECRETARY OF STATE SHALL MAIL A COPY OF ANY PROCESS AGAINST THE LIMITED LIABILITY COMPANY SERVED UPON THE SECRETARY OF STATE BY PERSONAL DELIVERY IS: 418 BROADWAY STE Y, ALBANY, ALBANY COUNTY, NY 12207" in text
+    assert "ORGANIZER: /S/ TESTY MCTESTFACE 418 BROADWAY STE Y, ALBANY, ALBANY COUNTY, NY 12207" in text
+    assert "FILER'S NAME AND ADDRESS: /S/ TESTY MCTESTFACE 418 BROADWAY STE Y, ALBANY, ALBANY COUNTY, NY 12207" in text
