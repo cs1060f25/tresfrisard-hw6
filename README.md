@@ -2,6 +2,8 @@
 
 This server accepts company formation data and generates Articles of Incorporation for Delaware corporations.
 
+Vercel App: https://tresfrisard-hw6-git-main-tres-frisards-projects.vercel.app
+
 ## Setup
 
 1. Install the required dependencies:
